@@ -1,0 +1,3 @@
+﻿user_query,query,filters
+AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,전사 AX 과제 추진 계획서,"document_box: ANY(""AX개발그룹"") owner: ANY(""김태원"") file_extension: ANY(""PPT"", ""PPTX"")"
+2023년도에 정재홍이 작성한 엑셀 문서,엑셀 문서,"create_time >= 2023-01-01T00:00:00Z create_time <= 2023-12-31T23:59:59Z owner: ANY(""정재홍"") file_extension: ANY(""XLS"", ""XLSX"")"
