@@ -1,3 +1,6 @@
-﻿user_query,query,filters
-AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,전사 AX 과제 추진 계획서,"document_box: ANY(""AX개발그룹"") owner: ANY(""김태원"") file_extension: ANY(""PPT"", ""PPTX"")"
-2023년도에 정재홍이 작성한 엑셀 문서,엑셀 문서,"create_time >= 2023-01-01T00:00:00Z create_time <= 2023-12-31T23:59:59Z owner: ANY(""정재홍"") file_extension: ANY(""XLS"", ""XLSX"")"
+﻿user_input,query,filters,score
+AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,전사 AX 과제 추진 계획서,"ecm_cabinet_name: ANY(""AX 개발그룹"") AND (owner_name: ANY(""김태원"") OR regist_user_name: ANY(""김태원"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",10
+2023년도에 정재홍이 작성한 엑셀 문서,,"(owner_name: ANY(""정재홍"") OR regist_user_name: ANY(""정재홍"")) AND ecm_file_format: ANY(""xls"", ""xlsx"", ""XLS"", ""XLSX"", ""csv"") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)",10
+유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래,팀즈,"owner_name: ANY(""유희영"")",10
+DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일,추진계획서,"ecm_cabinet_name: ANY(""DX기획그룹"") AND (owner_name: ANY(""이정훈"") OR regist_user_name: ANY(""이정훈"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",10
+과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,9
