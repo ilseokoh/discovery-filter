@@ -1,5 +1,6 @@
 import csv
 import os
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
@@ -14,6 +15,7 @@ load_dotenv()
 class FilterOutput(BaseModel):
     query: str = Field(description="필터 조건을 제외한 검색 쿼리")
     filter: str = Field(description="Google Cloud Discovery Engine API EBNF 필터 표현식")
+    desc: str = Field(description="filter 식의 조건과 query 검색어를 사람이 쉽게 이해할 수 있도록 풀어서 설명한 한 문장")
 
 
 class EvaluationOutput(BaseModel):
@@ -31,12 +33,17 @@ def get_client() -> genai.Client:
     return genai.Client()
 
 
-def get_filter(user_query: str, my_name: str = "나대엽", client: genai.Client | None = None) -> FilterOutput:
-    """사용자 입력 쿼리를 받아 Gemini 모델을 호출하여 Query와 Filter를 분리한 구조화된 결과를 반환합니다."""
+def get_filter(
+    user_query: str,
+    model: str = "gemini-3.5-flash-lite",
+    my_name: str = "나대엽",
+    client: genai.Client | None = None,
+) -> tuple[FilterOutput, float]:
+    """사용자 입력 쿼리를 받아 지정된 Gemini 모델을 호출하여 Query와 Filter를 분리하고 한 문장 설명(desc) 및 응답 시간(latency_sec)을 반환합니다."""
     if client is None:
         client = get_client()
 
-    prompt = f"""사용자의 질문에서 Filter와 Query를 분리해주세요.
+    prompt = f"""사용자의 질문에서 Filter와 Query를 분리하고, 이를 사람이 이해하기 쉽게 설명하는 desc(한 문장)를 작성해주세요.
 Filter 구문은 Google Cloud Discovery Engine API의 Extended Backus–Naur Form (EBNF) 표현식을 사용해야 합니다.
 
 [사용 가능한 필터 필드]
@@ -64,6 +71,12 @@ Filter 구문은 Google Cloud Discovery Engine API의 Extended Backus–Naur For
 5. 불용어 및 검색어(query) 정제:
   - "문서", "파일", "자료", "내용", "내", "내가 작성한" 등 검색 대상의 일반 지칭어나 단순 명사는 query에서 반드시 제외
   - 메타데이터 조건을 제외하고 남은 유효한 검색 키워드가 없는 경우, query는 빈 문자열("")로 설정
+6. 설명(desc) 작성 규칙:
+  - filter 식의 조건(부서/문서함, 작성자/소유자, 확장자, 등록일시 등)과 query 검색어를 조합하여 사람이 이해할 수 있는 자연스러운 한국어 '한 문장'으로 작성
+  - filter 식에 적용된 조건 내용을 구체적으로 풀어서 설명 (예: "ecm_cabinet_name: ANY(\"DX기획그룹\")" -> "DX기획그룹 문서함에서", "ecm_file_format: ANY(...)" -> "파워포인트(PPT) 파일 중", "owner_name: ANY(\"나대엽\")" -> "나대엽 소유/작성", "2026-01-01..." -> "2026년 등록된")
+  - query가 존재하는 경우: 필터 조건과 함께 "'{{query}}' 키워드로 검색합니다." 형식으로 마무리
+  - query가 빈 문자열("")인 경우: 필터 조건을 만족하는 문서를 검색함을 명시 (예: "오정완이 작성자이거나 등록자인 모든 문서를 검색합니다.")
+  - filter가 빈 문자열("")인 경우: "별도 필터 조건 없이 '{{query}}' 키워드로 전문 검색합니다." 형식으로 작성
 
 [내이름]: {my_name}
 [오늘 날짜]: {datetime.now().strftime('%Y-%m-%d')}
@@ -76,7 +89,8 @@ result:
 ```json
 {{
   "query":"추진계획서",
-  "filter":"ecm_cabinet_name: ANY(\"DX기획그룹\") AND owner_name: ANY(\"이정훈\") AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\") AND (ecm_regist_date >= 2026-01-01T00:00:00Z AND ecm_regist_date <= 2026-12-31T23:59:59Z)"
+  "filter":"ecm_cabinet_name: ANY(\"DX기획그룹\") AND (owner_name: ANY(\"이정훈\") OR regist_user_name: ANY(\"이정훈\")) AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\") AND (ecm_regist_date >= 2026-01-01T00:00:00Z AND ecm_regist_date <= 2026-12-31T23:59:59Z)",
+  "desc":"DX기획그룹 문서함에서 이정훈이 작성하거나 등록한 2026년 등록 파워포인트(PPT) 파일 중 '추진계획서' 키워드로 검색합니다."
 }}
 ```
 
@@ -87,7 +101,8 @@ result:
 ```json
 {{
   "query":"추진계획서",
-  "filter":"owner_name: ANY(\"나대엽\") AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\")"
+  "filter":"owner_name: ANY(\"나대엽\") AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\")",
+  "desc":"나대엽이 작성/소유한 파워포인트(PPT) 파일 중 '추진계획서' 키워드로 검색합니다."
 }}
 ```
 
@@ -97,13 +112,26 @@ result:
 ```json
 {{
   "query":"",
-  "filter":"(owner_name: ANY(\"오정완\") OR regist_user_name: ANY(\"오정완\"))"
+  "filter":"(owner_name: ANY(\"오정완\") OR regist_user_name: ANY(\"오정완\"))",
+  "desc":"소유자 또는 등록자가 오정완인 문서를 검색합니다."
+}}
+```
+
+example 4:
+user_query: Gemini Enterprise
+result:
+```json
+{{
+  "query":"Gemini Enterprise",
+  "filter":"",
+  "desc":"별도 필터 조건 없이 'Gemini Enterprise' 키워드로 전문 검색합니다."
 }}
 ```
 """
 
+    start_time = time.perf_counter()
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
+        model=model,
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
@@ -112,33 +140,37 @@ result:
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         ),
     )
+    latency_sec = time.perf_counter() - start_time
 
-    return response.parsed
+    return response.parsed, round(latency_sec, 3)
 
 
-def evaluate_filter(user_query: str, query: str, filters: str, my_name: str = "나대엽", client: genai.Client | None = None) -> EvaluationOutput:
-    """gemini-3.8-flash 모델을 사용하여 query와 filter 분리 결과를 10점 만점 기준으로 검증합니다."""
+def evaluate_filter(user_query: str, query: str, filters: str, desc: str = "", my_name: str = "나대엽", client: genai.Client | None = None) -> EvaluationOutput:
+    """gemini-3.8-flash 모델을 사용하여 query, filter, desc 분리 결과를 10점 만점 기준으로 검증합니다."""
     if client is None:
         client = get_client()
 
     eval_prompt = f"""당신은 Google Cloud Discovery Engine 검색 시스템의 쿼리 및 필터 분리 결과 검증 전문가입니다.
-사용자 질문(user_query)을 바탕으로 생성된 검색어(query)와 필터 표현식(filters)을 10점 만점 기준으로 엄격하게 평가해주세요.
+사용자 질문(user_query)을 바탕으로 생성된 검색어(query), 필터 표현식(filters), 설명(desc)을 10점 만점 기준으로 엄격하게 평가해주세요.
 
 [평가 기준]
-1. 필터 필드 및 EBNF 문법 정확성 (4점):
+1. 필터 필드 및 EBNF 문법 정확성 (3점):
    - Google Cloud Discovery Engine EBNF 문법(ANY, AND, OR, >=, <= 등) 준수 여부
    - 올바른 필드명(ecm_cabinet_name, owner_name, regist_user_name, ecm_file_format, ecm_regist_date 등) 사용 여부
 2. 조건 반영 충실도 (3점):
    - 사용자 질문에 명시된 작성자/소유자("내", "내가 작성한" 등 본인 지칭 시 [내이름] 반영 포함), 부서, 확장자, 기간 등의 조건이 필터에 빠짐없이 정확히 반영되었는가?
-3. 검색어(query) 정제도 (3점):
+3. 검색어(query) 정제도 (2점):
    - 필터 조건으로 분리된 속성을 제외하고 실제 검색할 핵심 키워드만 query로 남겼는가?
    - 질문에 필터링할 메타데이터가 없고 전문 검색이어야 하는 경우 filters가 비어있고 query에 전문이 들어가는 것이 적절함.
+4. 설명(desc) 작성 충실도 (2점):
+   - filter 식의 조건(부서, 작성자/소유자, 확장자, 기간 등)과 query 검색어를 사람이 알기 쉽게 한 문장으로 충실하게 풀어서 설명했는가?
 
 [검증 대상]
 - 사용자 질문: {user_query}
 - 사용자 이름: {my_name}
 - 생성된 쿼리: {query}
 - 생성된 필터: {filters}
+- 생성된 설명: {desc}
 """
 
     response = client.models.generate_content(
@@ -188,52 +220,86 @@ def main():
     client = get_client()
     my_name = os.environ.get("MY_NAME", "나대엽")
 
+    # 비교 테스트할 모델 목록
+    models_to_test = ["gemini-3.5-flash-lite", "gemini-3.7-flash"]
+
     results = []
-    print(f"\n총 {len(queries)}개의 쿼리 테스트 및 gemini-3.8-flash 검증 시작 (기본 사용자명: {my_name})...\n" + "=" * 60)
+    print(f"\n총 {len(queries)}개 쿼리 x {len(models_to_test)}개 모델 ({', '.join(models_to_test)}) Latency 및 품질 비교 테스트 시작 (기본 사용자명: {my_name})...\n" + "=" * 70)
+
     for idx, q in enumerate(queries, 1):
-        print(f"[{idx}] Input Query: {q}")
-        try:
-            result = get_filter(q, my_name=my_name, client=client)
-            print("Structured Output (JSON):")
-            print(result.model_dump_json(indent=2))
+        print(f"\n[{idx}/{len(queries)}] Input Query: {q}")
+        for model_name in models_to_test:
+            print(f"  ▶ Model: {model_name}")
+            try:
+                result, latency_sec = get_filter(q, model=model_name, my_name=my_name, client=client)
+                print(f"    - Latency: {latency_sec:.3f}초")
+                print(f"    - Query: '{result.query}'")
+                print(f"    - Filter: '{result.filter}'")
+                print(f"    - Desc: '{result.desc}'")
 
-            # gemini-3.8-flash 모델을 사용하여 결과 검증 및 10점 만점 점수화
-            eval_result = evaluate_filter(q, result.query, result.filter, my_name=my_name, client=client)
-            print(f"Validation Score: {eval_result.score}/10 (이유: {eval_result.reason})")
+                # gemini-3.8-flash 모델을 사용하여 결과 검증 및 10점 만점 점수화
+                eval_result = evaluate_filter(q, result.query, result.filter, desc=result.desc, my_name=my_name, client=client)
+                print(f"    - Validation Score: {eval_result.score}/10 (이유: {eval_result.reason})")
 
-            results.append({
-                "user_input": q,
-                "query": result.query,
-                "filters": result.filter,
-                "score": eval_result.score,
-                "reason": eval_result.reason,
-            })
-        except Exception as e:
-            print(f"오류 발생: {e}")
-            results.append({
-                "user_input": q,
-                "query": "",
-                "filters": f"ERROR: {e}",
-                "score": 0,
-                "reason": f"오류 발생: {e}",
-            })
-        print("-" * 60)
+                results.append({
+                    "user_input": q,
+                    "model": model_name,
+                    "latency_sec": latency_sec,
+                    "query": result.query,
+                    "filters": result.filter,
+                    "desc": result.desc,
+                    "score": eval_result.score,
+                    "reason": eval_result.reason,
+                })
+            except Exception as e:
+                print(f"    - 오류 발생: {e}")
+                results.append({
+                    "user_input": q,
+                    "model": model_name,
+                    "latency_sec": None,
+                    "query": "",
+                    "filters": f"ERROR: {e}",
+                    "desc": f"오류 발생: {e}",
+                    "score": 0,
+                    "reason": f"오류 발생: {e}",
+                })
+        print("-" * 70)
+
+    # 모델별 통계 요약
+    print("\n" + "=" * 70)
+    print("📊 모델별 Latency 및 품질 비교 요약")
+    print("=" * 70)
+    for model_name in models_to_test:
+        model_results = [r for r in results if r["model"] == model_name]
+        latencies = [r["latency_sec"] for r in model_results if isinstance(r["latency_sec"], (int, float))]
+        scores = [r["score"] for r in model_results if isinstance(r["score"], (int, float))]
+
+        avg_lat = sum(latencies) / len(latencies) if latencies else 0.0
+        min_lat = min(latencies) if latencies else 0.0
+        max_lat = max(latencies) if latencies else 0.0
+        avg_score = sum(scores) / len(scores) if scores else 0.0
+        perfect_count = sum(1 for s in scores if s == 10)
+
+        print(f"[{model_name}]")
+        print(f"  - 평균 응답 시간(Latency): {avg_lat:.3f}초 (최소: {min_lat:.3f}초 / 최대: {max_lat:.3f}초)")
+        print(f"  - 평균 검증 점수: {avg_score:.2f} / 10점 (만점 비율: {perfect_count}/{len(scores)}건)")
+    print("=" * 70)
 
     # score.csv 파일로 검증 결과 저장
     score_file = Path("score.csv")
     with open(score_file, mode="w", encoding="utf-8-sig", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["user_input", "query", "filters", "score", "reason"])
+        writer = csv.DictWriter(f, fieldnames=["user_input", "model", "latency_sec", "query", "filters", "desc", "score", "reason"])
         writer.writeheader()
         writer.writerows(results)
 
     # result.csv 파일도 호환성을 위해 저장
     result_file = Path("result.csv")
     with open(result_file, mode="w", encoding="utf-8-sig", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["user_input", "query", "filters", "score"])
+        writer = csv.DictWriter(f, fieldnames=["user_input", "model", "latency_sec", "query", "filters", "desc", "score"])
         writer.writeheader()
         writer.writerows([{k: v for k, v in r.items() if k != "reason"} for r in results])
 
-    print(f"\n검증 결과가 {score_file}에 저장되었습니다. (총 {len(results)}건)")
+    print(f"\n검증 결과가 {score_file} 및 {result_file}에 저장되었습니다. (총 {len(results)}건)")
 
 
 if __name__ == "__main__":

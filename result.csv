@@ -1,10 +1,19 @@
-﻿user_input,query,filters,score
-AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,전사 AX 과제 추진 계획서,"ecm_cabinet_name: ANY(""AX 개발그룹"") AND (owner_name: ANY(""김태원"") OR regist_user_name: ANY(""김태원"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",10
-2023년도에 정재홍이 작성한 엑셀 문서,,"(owner_name: ANY(""정재홍"") OR regist_user_name: ANY(""정재홍"")) AND ecm_file_format: ANY(""xls"", ""xlsx"", ""XLS"", ""XLSX"", ""csv"") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)",10
-유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래,팀즈,"owner_name: ANY(""유희영"")",10
-DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일,추진계획서,"ecm_cabinet_name: ANY(""DX기획그룹"") AND (owner_name: ANY(""이정훈"") OR regist_user_name: ANY(""이정훈"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",10
-과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,과제명 수소투자 그룹 투자 기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,9
-Gemini Enterprise,Gemini Enterprise,,10
-오정완 그룹장 문서,,"(owner_name: ANY(""오정완"") OR regist_user_name: ANY(""오정완""))",10
-내가 작성한 2024년 사업계획서 ppt 파일,사업계획서,"owner_name: ANY(""나대엽"") AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"") AND (ecm_regist_date >= 2024-01-01T00:00:00Z AND ecm_regist_date <= 2024-12-31T23:59:59Z)",10
-내 소유 문서 중 클라우드 마이그레이션 보고서,클라우드 마이그레이션,"owner_name: ANY(""나대엽"")",9
+﻿user_input,model,latency_sec,query,filters,desc,score
+AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,gemini-3.5-flash-lite,2.815,전사 AX 과제 추진 계획서,"ecm_cabinet_name: ANY(""AX 개발그룹"") AND (owner_name: ANY(""김태원"") OR regist_user_name: ANY(""김태원"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",AX 개발그룹 문서함에서 김태원이 작성하거나 등록한 파워포인트(PPT) 파일 중 '전사 AX 과제 추진 계획서' 키워드로 검색합니다.,10
+AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일,gemini-3.7-flash,3.444,전사 AX 과제 추진 계획서,"ecm_cabinet_name: ANY(""AX 개발그룹"") AND (owner_name: ANY(""김태원"") OR regist_user_name: ANY(""김태원"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",AX 개발그룹 문서함에서 김태원이 작성하거나 등록한 파워포인트(PPT) 파일 중 '전사 AX 과제 추진 계획서' 키워드로 검색합니다.,10
+2023년도에 정재홍이 작성한 엑셀 문서,gemini-3.5-flash-lite,1.304,,"(owner_name: ANY(""정재홍"") OR regist_user_name: ANY(""정재홍"")) AND ecm_file_format: ANY(""xls"", ""xlsx"", ""XLS"", ""XLSX"", ""csv"") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)",정재홍이 작성하거나 등록한 2023년 등록 엑셀 파일 중 별도 검색어 없이 검색합니다.,10
+2023년도에 정재홍이 작성한 엑셀 문서,gemini-3.7-flash,2.464,,"(owner_name: ANY(""정재홍"") OR regist_user_name: ANY(""정재홍"")) AND ecm_file_format: ANY(""xls"", ""xlsx"", ""XLS"", ""XLSX"", ""csv"") AND (ecm_regist_date >= ""2023-01-01T00:00:00Z"" AND ecm_regist_date <= ""2023-12-31T23:59:59Z"")",정재홍이 작성자이거나 등록자인 2023년 등록된 엑셀(스프레드시트) 문서를 검색합니다.,10
+유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래,gemini-3.5-flash-lite,1.085,팀즈,"(owner_name: ANY(""유희영"") OR regist_user_name: ANY(""유희영""))",소유자 또는 등록자가 유희영인 문서 중 '팀즈' 키워드로 검색합니다.,10
+유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래,gemini-3.7-flash,4.536,팀즈,"(owner_name: ANY(""유희영"") OR regist_user_name: ANY(""유희영""))",유희영이 작성자이거나 등록자인 문서 중 '팀즈' 키워드로 검색합니다.,10
+DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일,gemini-3.5-flash-lite,1.298,추진계획서,"ecm_cabinet_name: ANY(""DX기획그룹"") AND (owner_name: ANY(""이정훈"") OR regist_user_name: ANY(""이정훈"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",DX기획그룹 문서함에서 이정훈이 작성하거나 등록한 파워포인트(PPT) 파일 중 '추진계획서' 키워드로 검색합니다.,10
+DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일,gemini-3.7-flash,2.422,추진계획서,"ecm_cabinet_name: ANY(""DX기획그룹"") AND (owner_name: ANY(""이정훈"") OR regist_user_name: ANY(""이정훈"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",DX기획그룹 문서함에서 이정훈이 작성하거나 등록한 파워포인트(PPT) 파일 중 '추진계획서' 키워드로 검색합니다.,10
+과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,gemini-3.5-flash-lite,1.158,과제명 수소투자 그룹 투자 기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,별도 필터 조건 없이 '과제명 수소투자 그룹 투자 기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축' 키워드로 전문 검색합니다.,9
+과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,gemini-3.7-flash,7.24,수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,별도 필터 조건 없이 '수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축' 키워드로 전문 검색합니다.,10
+Gemini Enterprise,gemini-3.5-flash-lite,1.173,Gemini Enterprise,,별도 필터 조건 없이 'Gemini Enterprise' 키워드로 전문 검색합니다.,10
+Gemini Enterprise,gemini-3.7-flash,2.269,Gemini Enterprise,,별도 필터 조건 없이 'Gemini Enterprise' 키워드로 전문 검색합니다.,10
+오정완 그룹장 문서,gemini-3.5-flash-lite,0.99,,"(owner_name: ANY(""오정완"") OR regist_user_name: ANY(""오정완""))",소유자 또는 등록자가 오정완인 문서를 검색합니다.,10
+오정완 그룹장 문서,gemini-3.7-flash,1.779,,"(owner_name: ANY(""오정완"") OR regist_user_name: ANY(""오정완""))",오정완이 소유자이거나 등록자인 모든 문서를 검색합니다.,10
+내가 작성한 2024년 사업계획서 ppt 파일,gemini-3.5-flash-lite,1.227,사업계획서,"owner_name: ANY(""나대엽"") AND (ecm_regist_date >= 2024-01-01T00:00:00Z AND ecm_regist_date <= 2024-12-31T23:59:59Z) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPTX"", ""PPT"")",나대엽이 작성/소유한 2024년 등록 파워포인트(PPT) 파일 중 '사업계획서' 키워드로 검색합니다.,10
+내가 작성한 2024년 사업계획서 ppt 파일,gemini-3.7-flash,6.23,2024년 사업계획서,"owner_name: ANY(""나대엽"") AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",나대엽이 작성/소유한 파워포인트(PPT) 파일 중 '2024년 사업계획서' 키워드로 검색합니다.,10
+내 소유 문서 중 클라우드 마이그레이션 보고서,gemini-3.5-flash-lite,1.318,클라우드 마이그레이션 보고서,"owner_name: ANY(""나대엽"")",나대엽이 작성/소유한 문서 중 '클라우드 마이그레이션 보고서' 키워드로 검색합니다.,10
+내 소유 문서 중 클라우드 마이그레이션 보고서,gemini-3.7-flash,3.198,클라우드 마이그레이션 보고서,"owner_name: ANY(""나대엽"")",나대엽 소유/작성 문서 중 '클라우드 마이그레이션 보고서' 키워드로 검색합니다.,10
