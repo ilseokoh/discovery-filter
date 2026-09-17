@@ -69,15 +69,19 @@ uv run main.py
 
 ## 📊 검증 및 평가 결과 (`score.csv`)
 
-[test_query.csv](file:///Users/iloh/source/filter-function/test_query.csv)의 테스트 질의 5건에 대한 [score.csv](file:///Users/iloh/source/filter-function/score.csv) 추출 및 검증 결과입니다:
+[test_query.csv](file:///Users/iloh/source/filter-function/test_query.csv)의 테스트 질의 9건에 대한 [score.csv](file:///Users/iloh/source/filter-function/score.csv) 추출 및 검증 결과입니다:
 
 | No | 사용자 질문 (`user_input`) | 추출 검색어 (`query`) | 추출 필터 (`filters`) | 점수 (`score`) | 검증 사유 (`reason`) |
 | :---: | :--- | :--- | :--- | :---: | :--- |
-| **1** | AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일 | 전사 AX 과제 추진 계획서 | `ecm_cabinet_name: ANY("AX 개발그룹") AND (owner_name: ANY("김태원") OR regist_user_name: ANY("김태원")) AND ecm_file_format: ANY("ppt", "pptx", "PPT", "PPTX")` | **10 / 10** | 부서(`ecm_cabinet_name`), 작성자/등록자 OR 조건, 파일 확장자 대소문자 변형 처리가 EBNF 문법에 완벽히 부합하며, 핵심 키워드만 query로 깔끔하게 추출됨. |
-| **2** | 2023년도에 정재홍이 작성한 엑셀 문서 | *(빈 문자열)* | `(owner_name: ANY("정재홍") OR regist_user_name: ANY("정재홍")) AND ecm_file_format: ANY("xls", "xlsx", "XLS", "XLSX", "csv") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)` | **10 / 10** | 작성자, 엑셀 확장자, 2023년 연도 범위가 EBNF 문법에 맞게 모두 필터로 변환됨. 질문의 모든 요소가 메타데이터로 분리되어 query를 빈 문자열로 정제한 처리가 완벽함. |
+| **1** | AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계획서 ppt 파일 | 전사 AX 과제 추진 계획서 | `ecm_cabinet_name: ANY("AX 개발그룹") AND owner_name: ANY("김태원") AND ecm_file_format: ANY("ppt", "pptx", "PPT", "PPTX")` | **10 / 10** | EBNF 문법 준수 및 부서, 작성자, 확장자 조건 충실 반영. 불필요한 속성을 배제하고 핵심 키워드만 정제. |
+| **2** | 2023년도에 정재홍이 작성한 엑셀 문서 | *(빈 문자열)* | `owner_name: ANY("정재홍") AND ecm_file_format: ANY("xls", "xlsx", "XLS", "XLSX", "csv") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)` | **10 / 10** | 작성자, 엑셀 확장자, 2023년 연도 범위가 EBNF 문법에 맞게 모두 필터로 변환됨. 질문의 모든 요소가 메타데이터로 분리되어 query를 빈 값으로 정제한 처리가 완벽함. |
 | **3** | 유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래 | 팀즈 | `owner_name: ANY("유희영")` | **10 / 10** | 소유자 조건에서 직급('대리')을 제거하고 `owner_name` 필터로 정확히 추출함. 조사/어미를 제외하고 실제 검색 대상인 '팀즈'만 깔끔하게 검색어로 남김. |
 | **4** | DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일 | 추진계획서 | `ecm_cabinet_name: ANY("DX기획그룹") AND (owner_name: ANY("이정훈") OR regist_user_name: ANY("이정훈")) AND ecm_file_format: ANY("ppt", "pptx", "PPT", "PPTX")` | **10 / 10** | 부서, 작성자/등록자 OR 조건, 파일 형식(ppt/pptx) 조건이 누락 없이 정확히 반영되었으며, 검색어도 '추진계획서'로 정제됨. |
-| **5** | 과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축 | 과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축 | *(필터 없음)* | **9 / 10** | 메타데이터 조건이 없어 필터를 빈 값으로 둔 것은 정확함. 다만 질의 앞부분의 단순 레이블성 접두어인 '과제명'을 제거하고 핵심 제목만 남겼다면 더욱 좋았을 것이라는 피드백으로 1점 감점. |
+| **5** | 과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축 | 과제명 수소투자 그룹 투자 기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축 | *(필터 없음)* | **10 / 10** | 메타데이터 필터 조건이 없는 순수 과제명 전문 검색 질의이므로 필터가 빈 값으로 올바르게 처리됨. |
+| **6** | Gemini Enterprise | Gemini Enterprise | *(필터 없음)* | **10 / 10** | 필터링 메타데이터 조건이 없으므로 필터는 비우고 검색어만 정확히 유지함. |
+| **7** | 오정완 그룹장 문서 | 문서 | `owner_name: ANY("오정완")` | **6 / 10** | 필터 문법은 올바르나, '문서'는 불용어에 가까워 핵심 검색어(query)로 남기기에는 부적절함. |
+| **8** | **내가 작성한 2024년 사업계획서 ppt 파일** | **사업계획서** | `owner_name: ANY("나대엽") AND ecm_file_format: ANY("ppt", "pptx", "PPT", "PPTX") AND (ecm_regist_date >= 2024-01-01T00:00:00Z AND ecm_regist_date <= 2024-12-31T23:59:59Z)` | **10 / 10** | **'내가 작성한'을 사용자 이름([내이름]: 나대엽)과 매핑하여 owner_name 필터로 정확히 변환함. 2024년 기간 및 ppt 확장자 조건도 완벽히 반영.** |
+| **9** | **내 소유 문서 중 클라우드 마이그레이션 보고서** | **클라우드 마이그레이션 보고서** | `owner_name: ANY("나대엽")` | **10 / 10** | **'내 소유 문서' 조건을 사용자 이름 '나대엽'의 owner_name 필터로 변환하고, 핵심 키워드만 query로 깔끔하게 추출함.** |
 
 ---
 
@@ -105,25 +109,38 @@ Filter 구문은 Google Cloud Discovery Engine API의 Extended Backus–Naur For
 
 [필터 생성 규칙]
 1. 작성자/담당자 조건: (owner_name: ANY("이름") OR regist_user_name: ANY("이름")) 형태로 생성
-2. 기간 조건: "오늘", "작년" 등이 주어지면 ecm_regist_date 또는 ecm_file_modify_date에 UTC 타임스탬프 범위(>=, <=)를 적용
-3. 확장자 조건
+2. 본인 지칭 조건: "내", "나의", "내가 작성한", "내가 소유한" 등 owner_name(소유자/작성자)을 나로 지칭한 경우 owner_name 필터를 [내이름] 값으로 적용 (ex: owner_name: ANY("{my_name}"))
+3. 기간 조건: "오늘", "작년" 등이 주어지면 ecm_regist_date 또는 ecm_file_modify_date에 UTC 타임스탬프 범위(>=, <=)를 적용
+4. 확장자 조건
   - 파워포인트/PPT: ANY("ppt", "pptx", "PPT", "PPTX")
   - 엑셀/스프레드시트: ANY("xls", "xlsx", "XLS", "XLSX", "csv")
   - 워드/문서: ANY("doc", "docx", "DOC", "DOCX", "hwp", "HWP")
   - 이미지: ANY("jpg", "jpeg", "png", "JPG", "PNG")
-4. 일반 검색 키워드는 query 필드에 남기고, 명확한 메타데이터 조건만 filter 필드에 적용
+5. 일반 검색 키워드는 query 필드에 남기고, 명확한 메타데이터 조건만 filter 필드에 적용 ("내", "내가 작성한" 등의 표현은 query에서 제외)
 
+[내이름]: {my_name}
 [오늘 날짜]: {YYYY-MM-DD}
 
 [사용자 질문]: {user_query}
 
-example:
+example 1:
 user_query: DX기획그룹 문서 중 2026년에 이정훈 차장이 작성한 추진계획서 PPT 파일
 result: 
 ```json
 {
   "query":"추진계획서",
   "filter":"ecm_cabinet_name: ANY(\"DX기획그룹\") AND owner_name: ANY(\"이정훈\") AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\") AND (ecm_regist_date >= 2026-01-01T00:00:00Z AND ecm_regist_date <= 2026-12-31T23:59:59Z)"
+}
+```
+
+example 2:
+[내이름]: 나대엽
+user_query: 내가 작성한 추진계획서 PPT 파일
+result:
+```json
+{
+  "query":"추진계획서",
+  "filter":"owner_name: ANY(\"나대엽\") AND ecm_file_format: ANY(\"ppt\", \"pptx\", \"PPTX\", \"PPT\")"
 }
 ```
 ```
@@ -140,7 +157,7 @@ result:
    - Google Cloud Discovery Engine EBNF 문법(ANY, AND, OR, >=, <= 등) 준수 여부
    - 올바른 필드명(ecm_cabinet_name, owner_name, regist_user_name, ecm_file_format, ecm_regist_date 등) 사용 여부
 2. 조건 반영 충실도 (3점):
-   - 사용자 질문에 명시된 작성자/소유자, 부서, 확장자, 기간 등의 조건이 필터에 빠짐없이 정확히 반영되었는가?
+   - 사용자 질문에 명시된 작성자/소유자("내", "내가 작성한" 등 본인 지칭 시 [내이름] 반영 포함), 부서, 확장자, 기간 등의 조건이 필터에 빠짐없이 정확히 반영되었는가?
 3. 검색어(query) 정제도 (3점):
    - 필터 조건으로 분리된 속성을 제외하고 실제 검색할 핵심 키워드만 query로 남겼는가?
    - 질문에 필터링할 메타데이터가 없고 전문 검색이어야 하는 경우 filters가 비어있고 query에 전문이 들어가는 것이 적절함.

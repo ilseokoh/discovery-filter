@@ -3,4 +3,8 @@ AX 개발그룹 문서중에 김태원이 작성한 전사 AX 과제 추진 계�
 2023년도에 정재홍이 작성한 엑셀 문서,,"(owner_name: ANY(""정재홍"") OR regist_user_name: ANY(""정재홍"")) AND ecm_file_format: ANY(""xls"", ""xlsx"", ""XLS"", ""XLSX"", ""csv"") AND (ecm_regist_date >= 2023-01-01T00:00:00Z AND ecm_regist_date <= 2023-12-31T23:59:59Z)",10
 유희영 대리 소유 문서 중에 팀즈 관련 문서 좀 찾아줄래,팀즈,"owner_name: ANY(""유희영"")",10
 DX기획그룹 문서 중 이정훈 차장이 작성한 추진계획서 ppt 파일,추진계획서,"ecm_cabinet_name: ANY(""DX기획그룹"") AND (owner_name: ANY(""이정훈"") OR regist_user_name: ANY(""이정훈"")) AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"")",10
-과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,9
+과제명 수소투자 그룹 투자/기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,과제명 수소투자 그룹 투자 기획 업무 지원을 위한 AI 기반 정보통합 분석 및 대화형 검색 환경 구축,,9
+Gemini Enterprise,Gemini Enterprise,,10
+오정완 그룹장 문서,,"(owner_name: ANY(""오정완"") OR regist_user_name: ANY(""오정완""))",10
+내가 작성한 2024년 사업계획서 ppt 파일,사업계획서,"owner_name: ANY(""나대엽"") AND ecm_file_format: ANY(""ppt"", ""pptx"", ""PPT"", ""PPTX"") AND (ecm_regist_date >= 2024-01-01T00:00:00Z AND ecm_regist_date <= 2024-12-31T23:59:59Z)",10
+내 소유 문서 중 클라우드 마이그레이션 보고서,클라우드 마이그레이션,"owner_name: ANY(""나대엽"")",9
